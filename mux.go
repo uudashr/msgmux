@@ -138,7 +138,7 @@ func validateHandler(fn MessageHandler) error {
 			return fmt.Errorf("msgmux: fn MessageHandler 1st input parameter should be an context.Context (got: %v)", fnType.In(0).Kind())
 		}
 
-		if !reflect.TypeFor[context.Context]().Implements(fnType.In(0)) {
+		if !fnType.In(0).Implements(reflect.TypeFor[context.Context]()) {
 			return fmt.Errorf("msgmux: fn MessageHandler 1st input parameter should be context.Context (got: %v)", fnType.In(0).Kind())
 		}
 
