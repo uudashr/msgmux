@@ -133,15 +133,12 @@ func validateHandler(fn MessageHandler) error {
 			return fmt.Errorf("msgmux: fn MessageHandler input parameter should be a struct (got: %v)", fnType.In(0).Kind())
 		}
 	case 2:
-		// if fnType.In(0).Kind() != reflect.Interface {
-		// 	return fmt.Errorf("msgmux: fn MessageHandler input parameter should be an interface (got: %v)", fnType.In(0).Kind())
-		// }
+		if fnType.In(0).Kind() != reflect.Interface {
+			// expect context.Context interface, but got non-interface
+			return fmt.Errorf("msgmux: fn MessageHandler 1st input parameter should be an context.Context (got: %v)", fnType.In(0).Kind())
+		}
 
-		// if fnType.In(0).Name() != "Context" {
-		// 	return fmt.Errorf("msgmux: fn MessageHandler 1st input parameter should be context.Context (got: %v)", fnType.In(0).Name())
-		// }
-
-		if !isContextType(fnType.In(0)) {
+		if !reflect.TypeFor[context.Context]().Implements(fnType.In(0)) {
 			return fmt.Errorf("msgmux: fn MessageHandler 1st input parameter should be context.Context (got: %v)", fnType.In(0).Kind())
 		}
 
@@ -157,7 +154,8 @@ func validateHandler(fn MessageHandler) error {
 	}
 
 	if fnType.Out(0).Kind() != reflect.Interface {
-		return fmt.Errorf("msgmux: fn MessageHandler output parameter should be an interface (got: %v)", fnType.Out(0).Kind())
+		// expect error interface, but got non-interface
+		return fmt.Errorf("msgmux: fn MessageHandler output parameter should be an error (got: %v)", fnType.Out(0).Kind())
 	}
 
 	if fnType.Out(0).Name() != "error" {
@@ -165,16 +163,4 @@ func validateHandler(fn MessageHandler) error {
 	}
 
 	return nil
-}
-
-func isContextType(t reflect.Type) bool {
-	if t == nil {
-		return false
-	}
-
-	// Get the reflect.Type of context.Context interface
-	contextType := reflect.TypeOf((*context.Context)(nil)).Elem()
-
-	// Check if t implements context.Context
-	return t.Implements(contextType)
 }
