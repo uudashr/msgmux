@@ -1,3 +1,5 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/uudashr/msgmux.svg)](https://pkg.go.dev/github.com/uudashr/msgmux)
+
 # msgmux
 Message multiplexer.
 
