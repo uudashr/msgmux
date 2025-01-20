@@ -1,3 +1,3 @@
-// Package msgmux provides message multiplexer.
-// It can be use to process any kind of message, such as event, command, etc.
+// Package msgmux provides a message multiplexer.
+// It can be used to dispatch and handle any kind of message such as events and commands.
 package msgmux

@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// Message represent specific message. It must be struct type.
+// Message represents a specific message. It must be a struct type.
 //
 // Example:
 //
@@ -20,7 +20,7 @@ import (
 //	}
 type Message any
 
-// MssageHandler is a function type to handle the message.
+// MssageHandler is a function type to handle the messages.
 //
 // The form of function is:
 //
@@ -30,25 +30,31 @@ type Message any
 //
 //	func(ctx context.Context, msg Message) error
 //
-// where the [Message] represent the specific message type (struct).
+// where the [Message] represents a specific message type (struct).
 //
 // Example:
 //
-//	mux := &msgmux.DispatchMux{}
+//	mux := msgmux.NewDispatchMux()
 //	mux.Handle(func(event OrderCompleted) error {
 //		// handle the event
 //		return nil
 //	})
 type MessageHandler any
 
+// DispatchMux is a message multiplexer.
 type DispatchMux struct {
 	handlers map[reflect.Type]MessageHandler
 }
 
+// NewDispatchMux allocates and returns a new [DispatchMux].
 func NewDispatchMux() *DispatchMux {
 	return &DispatchMux{}
 }
 
+// Handle registers a fn as handler for the specific message type.
+//
+// The fn need to be valid [MessageHandler], otherwise it will panic.
+// Multiple registrations for the same message type is not allowed and will cause a panic.
 func (m *DispatchMux) Handle(fn MessageHandler) {
 	if err := validateHandler(fn); err != nil {
 		panic(err)
@@ -76,6 +82,9 @@ func (m *DispatchMux) Handle(fn MessageHandler) {
 	m.handlers[msgType] = fn
 }
 
+// DispatchContext dispatches the message.
+//
+// The msg need to be a valid [Message], otherwise it will return an error.
 func (m *DispatchMux) DispatchContext(ctx context.Context, msg Message) error {
 	eventType := reflect.TypeOf(msg)
 	if eventType.Kind() != reflect.Struct {
@@ -94,6 +103,9 @@ func (m *DispatchMux) DispatchContext(ctx context.Context, msg Message) error {
 	return invokeHandler(ctx, handler, msg)
 }
 
+// Dispatch dispatches the message.
+//
+// A shorthand of [DispatchMux.DispatchContext] with [context.Background].
 func (m *DispatchMux) Dispatch(msg Message) error {
 	return m.DispatchContext(context.Background(), msg)
 }
